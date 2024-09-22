@@ -95,10 +95,23 @@ int convertToUTF8(const std::string &input_string, std::string &output_string);
 #endif
 HeaderMap getHeaders(const std::string& url);
 
+inline std::string& rtrim(std::string& s)
+{
+    rtrim_is(s);
+    return s;
+}
+/*
 inline std::string &rtrim(std::string &s)
 {
     s.erase(std::find_if(s.rbegin(), s.rend(),
             std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
     return s;
 }
+*/
+inline void rtrim_i(std::string &s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }).base(), s.end());
+}
+
 #endif
