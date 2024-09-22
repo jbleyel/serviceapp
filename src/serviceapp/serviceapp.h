@@ -27,11 +27,7 @@ struct eServiceAppOptions
 						   connectionSpeedInKb(std::numeric_limits<unsigned int>::max()){};
 };
 
-#if SIGCXX_MAJOR_VERSION == 2
 class eServiceApp : public sigc::trackable,
-#else
-class eServiceApp : public Object,
-#endif
 					public iPlayableService,
 					public iPauseableService,
 					public iSeekableService,
@@ -54,7 +50,7 @@ class eServiceApp : public Object,
 #if SIGCXX_MAJOR_VERSION == 2
 	sigc::signal2<void, iPlayableService *, int> m_event;
 #else
-	Signal2<void, iPlayableService *, int> m_event;
+	sigc::signal<void(iPlayableService*,int)> m_event;
 #endif
 	eServiceAppOptions *options;
 	PlayerBackend *player;
@@ -112,7 +108,7 @@ public:
 #if SIGCXX_MAJOR_VERSION == 2
 	RESULT connectEvent(const sigc::slot2<void, iPlayableService *, int> &event, ePtr<eConnection> &connection);
 #else
-	RESULT connectEvent(const Slot2<void, iPlayableService *, int> &event, ePtr<eConnection> &connection);
+	RESULT connectEvent(const sigc::slot<void(iPlayableService*,int)> &event, ePtr<eConnection> &connection);
 #endif
 	RESULT start();
 	RESULT stop();
