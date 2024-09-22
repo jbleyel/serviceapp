@@ -103,7 +103,7 @@ inline void rtrim_i(std::string &s) {
 
 inline std::string& rtrim(std::string& s)
 {
-    rtrim_is(s);
+    rtrim_i(s);
     return s;
 }
 /*
