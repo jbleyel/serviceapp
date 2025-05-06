@@ -26,7 +26,7 @@ def isExtEplayer3Available():
 
 
 def isGstPlayerAvailable():
-	return os.path.isfile(eEnv.resolve("$bindir/gstplayer_gst-1.0"))
+	return os.path.isfile(eEnv.resolve("$bindir/gstplayer2"))
 
 
 def isServiceMP3Replaced():
