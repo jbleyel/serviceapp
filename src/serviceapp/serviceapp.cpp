@@ -9,7 +9,8 @@
 #include <lib/base/init_num.h>
 #include <lib/base/init.h>
 #include <lib/base/eenv.h>
-#include <lib/base/nconfig.h>
+#include <lib/base/esimpleconfig.h>
+#include <lib/base/esettings.h>
 #ifdef HAVE_EPG
 #include <lib/dvb/epgcache.h>
 #endif
@@ -214,6 +215,7 @@ eServiceApp::eServiceApp(eServiceReference ref):
 	m_resolve_uri("resolve://"),
 	m_event_started(false),
 	m_paused(false),
+	m_debug(false),
 	m_framerate(-1),
 	m_width(-1),
 	m_height(-1),
@@ -458,7 +460,8 @@ void eServiceApp::pullSubtitles()
 {
 	std::queue<subtitleMessage> pulled;
 	player->getSubtitles(pulled);
-	eDebug("eServiceApp::pullSubtitles - pulling %d subtitles", pulled.size());
+	if (m_debug)
+		eDebug("eServiceApp::pullSubtitles - pulling %d subtitles", pulled.size());
 	while (!pulled.empty())
 	{
 		subtitleMessage sub = pulled.front();
@@ -474,10 +477,10 @@ void eServiceApp::pushSubtitles()
 	int32_t next_timer = 0, decoder_ms, start_ms, end_ms, diff_start_ms, diff_end_ms;
 	subtitle_pages_map::const_iterator current;
 
-	int delay = eConfigManager::getConfigIntValue("config.subtitles.pango_subtitles_delay");
+	int delay = eSubtitleSettings::pango_subtitles_delay;
 	if (isExternalTrack(*m_selected_subtitle_track))
 	{
-		int subtitle_fps = eConfigManager::getConfigIntValue("config.subtitles.pango_subtitles_fps");
+		int subtitle_fps = eSubtitleSettings::pango_subtitles_fps;
 		if (subtitle_fps != m_prev_subtitle_fps)
 		{
 			m_prev_subtitle_fps = subtitle_fps;
@@ -578,17 +581,20 @@ exit:
 
 void eServiceApp::signalEventUpdatedInfo()
 {
-	eDebug("eServiceApp::signalEventUpdatedInfo");
+	if (m_debug)
+		eDebug("eServiceApp::signalEventUpdatedInfo");
     m_event(this, evUpdatedInfo);
 }
 
 void eServiceApp::urlResolved(int success)
 {
-	eDebug("eServiceApp::urlResolved: %s", success ? "success": "error");
+	if (m_debug)
+		eDebug("eServiceApp::urlResolved: %s", success ? "success": "error");
 	if (success)
 	{
 		m_ref.path = m_resolver->getUrl();
-		eDebug("eServiceApp::urlResolved: %s", m_ref.path.c_str());
+		if (m_debug)
+			eDebug("eServiceApp::urlResolved: %s", m_ref.path.c_str());
 		start();
 	}
 	else
@@ -600,14 +606,16 @@ void eServiceApp::gotExtPlayerMessage(int message)
 	switch (message)
 	{
 		case PlayerMessage::start:
-			eDebug("eServiceApp::gotExtPlayerMessage - start");
+			if (m_debug)
+				eDebug("eServiceApp::gotExtPlayerMessage - start");
 			m_event_updated_info_timer->start(1000, true);
 #ifdef HAVE_EPG
 			updateEpgCacheNowNext();
 #endif
 			break;
 		case PlayerMessage::stop:
-			eDebug("eServiceApp::gotExtPlayerMessage - stop");
+			if (m_debug)
+				eDebug("eServiceApp::gotExtPlayerMessage - stop");
 			// evEOF signals that end of file was reached and we
 			// could make operations like seek back or play again, 
 			// however when player signals stop, process
@@ -617,20 +625,24 @@ void eServiceApp::gotExtPlayerMessage(int message)
 			m_event(this, evEOF);
 			break;
 		case PlayerMessage::pause:
-			eDebug("eServiceApp::gotExtPlayerMessage - pause");
+			if (m_debug)
+				eDebug("eServiceApp::gotExtPlayerMessage - pause");
 			m_paused = true;
 			break;
 		case PlayerMessage::resume:
-			eDebug("eServiceApp::gotExtPlayerMessage - resume");
+			if (m_debug)
+				eDebug("eServiceApp::gotExtPlayerMessage - resume");
 			m_paused = false;
 			break;
 		case PlayerMessage::error:
-			eDebug("eServiceApp::gotExtPlayerMessage - error");
+			if (m_debug)
+				eDebug("eServiceApp::gotExtPlayerMessage - error");
 			m_event(this, evUser + 12);
 			break;
 		case PlayerMessage::videoSizeChanged:
 		{
-			eDebug("eServiceApp::gotExtPlayerMessage - videoSizeChanged");
+			if (m_debug)
+				eDebug("eServiceApp::gotExtPlayerMessage - videoSizeChanged");
 			videoStream v;
 			if (!player->videoGetTrackInfo(v,0))
 			{
@@ -642,7 +654,8 @@ void eServiceApp::gotExtPlayerMessage(int message)
 		}
 		case PlayerMessage::videoFramerateChanged:
 		{
-			eDebug("eServiceApp::gotExtPlayerMessage - videoFramerateChanged");
+			if (m_debug)
+				eDebug("eServiceApp::gotExtPlayerMessage - videoFramerateChanged");
 			videoStream v;
 			if (!player->videoGetTrackInfo(v,0))
 			{
@@ -653,7 +666,8 @@ void eServiceApp::gotExtPlayerMessage(int message)
 		}
 		case PlayerMessage::videoProgressiveChanged:
 		{
-			eDebug("eServiceApp::gotExtPlayerMessage - videoProgressiveChanged");
+			if (m_debug)
+				eDebug("eServiceApp::gotExtPlayerMessage - videoProgressiveChanged");
 			videoStream v;
 			if (!player->videoGetTrackInfo(v,0))
 			{
@@ -663,23 +677,21 @@ void eServiceApp::gotExtPlayerMessage(int message)
 			break;
 		}
 		case PlayerMessage::subtitleAvailable:
-			eDebug("eServiceApp::gotExtPlayerMessage - subtitleAvailable");
+			if (m_debug)
+				eDebug("eServiceApp::gotExtPlayerMessage - subtitleAvailable");
 			if (m_selected_subtitle_track && isEmbeddedTrack(*m_selected_subtitle_track))
 				pullSubtitles();
 			break;
 		default:
-			eDebug("eServiceApp::gotExtPlayerMessage - unhandled message");
+			if (m_debug)
+				eDebug("eServiceApp::gotExtPlayerMessage - unhandled message");
 			break;
 	}
 }
 
 
 // __iPlayableService
-#if SIGCXX_MAJOR_VERSION == 2
-RESULT eServiceApp::connectEvent(const sigc::slot2< void, iPlayableService*, int >& event, ePtr< eConnection >& connection)
-#else
 RESULT eServiceApp::connectEvent(const sigc::slot<void(iPlayableService*,int)>& event, ePtr< eConnection >& connection)
-#endif
 {
 	connection = new eConnection((iPlayableService*)this, m_event.connect(event));
 	return 0;
@@ -761,6 +773,9 @@ RESULT eServiceApp::start()
 			headers = subservice.headers;
 		}
 	}
+	m_debug = eSimpleConfig::getBool("config.plugins.serviceapp.debug", false);
+	player->setDebug(m_debug);
+
 	// don't pass fragment part to player
 	player->start(Url(path_str).url(), headers);
 	return 0;
@@ -768,7 +783,8 @@ RESULT eServiceApp::start()
 
 RESULT eServiceApp::stop()
 {
-	eDebug("eServiceApp::stop");
+	if (m_debug)
+		eDebug("eServiceApp::stop");
 	if (m_resolver) m_resolver->stop();
 	player->stop();
 	return 0;
@@ -875,7 +891,8 @@ RESULT eServiceApp::setTrickmode(int trick)
 
 RESULT eServiceApp::isCurrentlySeekable()
 {
-	eDebug("eServiceApp::isCurrentlySeekable");
+	if (m_debug)
+		eDebug("eServiceApp::isCurrentlySeekable");
 	/* just assume that seeking and fast/slow winding are possible */
 	return 3;
 }

@@ -76,11 +76,7 @@ public:
     std::string getUrl();
 
     void scriptEnded(int retval);
-#if SIGCXX_MAJOR_VERSION == 2
-    sigc::signal1<void,int> urlResolved;
-#else
     sigc::signal<void(int)> urlResolved;
-#endif
 };
 
 #endif // SCRIPTRUN_H

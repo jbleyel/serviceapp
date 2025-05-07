@@ -1,9 +1,5 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-from __future__ import print_function
-
-import os
-import json
+from os.path import isfile
+from json import loads
 
 
 from Components.ActionMap import ActionMap
@@ -33,11 +29,11 @@ SINKS_DEFAULT = ("", "")
 SINKS_EXPERIMENTAL = ("dvbvideosinkexp", "dvbaudiosinkexp")
 
 sink_choices = []
-if (os.path.isfile(eEnv.resolve("$libdir/gstreamer-1.0/libgstdvbvideosink.so")) and
-        os.path.isfile(eEnv.resolve("$libdir/gstreamer-1.0/libgstdvbaudiosink.so"))):
+if (isfile(eEnv.resolve("$libdir/gstreamer-1.0/libgstdvbvideosink.so")) and
+        isfile(eEnv.resolve("$libdir/gstreamer-1.0/libgstdvbaudiosink.so"))):
     sink_choices.append(("original", _("original")))
-if (os.path.isfile(eEnv.resolve("$libdir/gstreamer-1.0/libgstdvbvideosinkexp.so")) and
-        os.path.isfile(eEnv.resolve("$libdir/gstreamer-1.0/libgstdvbaudiosinkexp.so"))):
+if (isfile(eEnv.resolve("$libdir/gstreamer-1.0/libgstdvbvideosinkexp.so")) and
+        isfile(eEnv.resolve("$libdir/gstreamer-1.0/libgstdvbaudiosinkexp.so"))):
     sink_choices.append(("experimental", _("experimental")))
 
 player_choices = [("gstplayer", _("gstplayer")), ("exteplayer3", _("exteplayer3"))]
@@ -46,6 +42,7 @@ EXTEPLAYER3_VERSION = None
 
 config.plugins.serviceapp = ConfigSubsection()
 config_serviceapp = config.plugins.serviceapp
+config_serviceapp.debug = ConfigBoolean(default=False)
 
 config_serviceapp.servicemp3 = ConfigSubsection()
 config_serviceapp.servicemp3.replace = ConfigBoolean(default=False, descriptions={0: _("original"), 1: _("serviceapp")})
@@ -348,7 +345,7 @@ class ServiceAppDetectPlayers(Screen):
         jsondata = None
         for line in data.splitlines():
             try:
-                jsondata = json.loads(line)
+                jsondata = loads(line)
                 break
             except ValueError as e:
                 pass

@@ -47,11 +47,7 @@ class eServiceApp : public sigc::trackable,
 	bool m_subservices_checked;
 	void fillSubservices();
 
-#if SIGCXX_MAJOR_VERSION == 2
-	sigc::signal2<void, iPlayableService *, int> m_event;
-#else
 	sigc::signal<void(iPlayableService*,int)> m_event;
-#endif
 	eServiceAppOptions *options;
 	PlayerBackend *player;
 	BasePlayer *extplayer;
@@ -61,6 +57,7 @@ class eServiceApp : public sigc::trackable,
 
 	bool m_event_started;
 	bool m_paused;
+	bool m_debug;
 	int m_framerate, m_width, m_height, m_progressive;
 
 	typedef std::map<uint32_t, subtitleMessage> subtitle_pages_map;
@@ -105,11 +102,7 @@ public:
 	~eServiceApp();
 
 	// iPlayableService
-#if SIGCXX_MAJOR_VERSION == 2
-	RESULT connectEvent(const sigc::slot2<void, iPlayableService *, int> &event, ePtr<eConnection> &connection);
-#else
 	RESULT connectEvent(const sigc::slot<void(iPlayableService*,int)> &event, ePtr<eConnection> &connection);
-#endif
 	RESULT start();
 	RESULT stop();
 #if OPENPLI_ISERVICE_VERSION > 1

@@ -228,7 +228,7 @@ int PlayerBackend::stop()
 	{
 		// wait 10 seconds for normal exit if timed out then kill process
 		mWaitForStop = true;
-		WaitThread t(mWaitForStopMutex, mWaitForStopCond, mWaitForStop, 10000);
+		WaitThread t(mWaitForStopMutex, mWaitForStopCond, mWaitForStop, 3000);
 		t.run();
 		mMessageThread.send(Message(Message::tStop));
 		t.kill();
@@ -417,7 +417,8 @@ void PlayerBackend::gotMessage(const PlayerBackend::Message& message)
 	switch (message.type)
 	{
 		case Message::tStart:
-			eDebug("PlayerBackend::gotMessage - tStart");
+			if(mDebug)
+				eDebug("PlayerBackend::gotMessage - tStart");
 			if (pPlayer->start(this) < 0)
 			{
 				quit(0);
@@ -430,94 +431,117 @@ void PlayerBackend::gotMessage(const PlayerBackend::Message& message)
 			}
 			break;
 		case Message::tStop:
-			eDebug("PlayerBackend::gotMessage - tStop");
+			if(mDebug)
+				eDebug("PlayerBackend::gotMessage - tStop");
 			mTimer->stop();
 			pPlayer->sendStop();
 			break;
 		case Message::tKill:
-			eDebug("PlayerBackend::gotMessage - tKill");
+			if(mDebug)
+				eDebug("PlayerBackend::gotMessage - tKill");
 			pPlayer->sendForceStop();
 			break;
 		case Message::tPause:
-			eDebug("PlayerBackend::gotMessage - tPause");
+			if(mDebug)
+				eDebug("PlayerBackend::gotMessage - tPause");
 			pPlayer->sendPause();
 			break;
 		case Message::tResume:
-			eDebug("PlayerBackend::gotMessage - tUnpause");
+			if(mDebug)
+				eDebug("PlayerBackend::gotMessage - tUnpause");
 			pPlayer->sendResume();
 			break;
 		case Message::tSeekTo:
-			eDebug("PlayerBackend::gotMessage - tSeekTo");
+			if(mDebug)
+				eDebug("PlayerBackend::gotMessage - tSeekTo");
 			pPlayer->sendSeekTo(message.dataInt);
 			break;
 		case Message::tSeekRelative:
-			eDebug("PlayerBackend::gotMessage - tSeekRelative");
+			if(mDebug)
+				eDebug("PlayerBackend::gotMessage - tSeekRelative");
 			pPlayer->sendSeekRelative(message.dataInt);
 			break;
 		case Message::tAudioSelect:
-			eDebug("PlayerBackend::gotMessage - tAudioSelect");
+			if(mDebug)
+				eDebug("PlayerBackend::gotMessage - tAudioSelect");
 			pPlayer->sendAudioSelectTrack(message.dataInt);
 			break;
 		case Message::tAudioList:
-			eDebug("PlayerBackend::gotMessage - tAudioList");
+			if(mDebug)
+				eDebug("PlayerBackend::gotMessage - tAudioList");
 			pPlayer->sendUpdateAudioTracksList();
 			break;
 		case Message::tSubtitleSelect:
-			eDebug("PlayerBackend::gotMessage - tSubtitleSelect");
+			if(mDebug)
+				eDebug("PlayerBackend::gotMessage - tSubtitleSelect");
 			pPlayer->sendSubtitleSelectTrack(message.dataInt);
 			break;
 		case Message::tSubtitleList:
-			eDebug("PlayerBackend::gotMessage - tSubtitleList");
+			if(mDebug)
+				eDebug("PlayerBackend::gotMessage - tSubtitleList");
 			pPlayer->sendUpdateSubtitleTracksList();
 			break;
 		case Message::tGetLength:
-			eDebug("PlayerBackend::gotMessage - tGetLength");
+			if(mDebug)
+				eDebug("PlayerBackend::gotMessage - tGetLength");
 			pPlayer->sendUpdateLength();
 			break;
 		case Message::start:
-			eDebug("PlayerBackend::gotMessage - start");
+			if(mDebug)
+				eDebug("PlayerBackend::gotMessage - start");
 			gotPlayerMessage(PlayerMessage::start);
 			break;
 		case Message::stop:
-			eDebug("PlayerBackend::gotMessage - stop");
+			if(mDebug)
+				eDebug("PlayerBackend::gotMessage - stop");
 			gotPlayerMessage(PlayerMessage::stop);
 			break;
 		case Message::pause:
-			eDebug("PlayerBackend::gotMessage - pause");
+			if(mDebug)
+				eDebug("PlayerBackend::gotMessage - pause");
 			gotPlayerMessage(PlayerMessage::pause);
 			break;
 		case Message::resume:
-			eDebug("PlayerBackend::gotMessage - resume");
+			if(mDebug)
+				eDebug("PlayerBackend::gotMessage - resume");
 			gotPlayerMessage(PlayerMessage::resume);
 			break;
 		case Message::videoSizeChanged:
-			eDebug("PlayerBackend::gotMessage - videoSizeChanged");
+			if(mDebug)
+				eDebug("PlayerBackend::gotMessage - videoSizeChanged");
 			gotPlayerMessage(PlayerMessage::videoSizeChanged);
 			break;
 		case Message::videoFramerateChanged:
-			eDebug("PlayerBackend::gotMessage - videoFramerateChanged");
+			if(mDebug)
+				eDebug("PlayerBackend::gotMessage - videoFramerateChanged");
 			gotPlayerMessage(PlayerMessage::videoFramerateChanged);
 			break;
 		case Message::videoProgressiveChanged:
-			eDebug("PlayerBackend::gotMessage - videoProgressiveChanged");
+			if(mDebug)
+				eDebug("PlayerBackend::gotMessage - videoProgressiveChanged");
 			gotPlayerMessage(PlayerMessage::videoProgressiveChanged);
 			break;
 		case Message::audioSelect:
-			eDebug("PlayerBackend::gotMessage - audioSelect");
+			if(mDebug)
+				eDebug("PlayerBackend::gotMessage - audioSelect");
 			break;
 		case Message::audioList:
-			eDebug("PlayerBackend::gotMessage - audioList");
+			if(mDebug)
+				eDebug("PlayerBackend::gotMessage - audioList");
 			break;
 		case Message::error:
-			eDebug("PlayerBackend::gotMessage - error");
+			if(mDebug)
+				eDebug("PlayerBackend::gotMessage - error");
 			gotPlayerMessage(PlayerMessage::error);
 			break;
 		case Message::subtitleAvailable:
-			eDebug("PlayerBackend::gotMessage - subtitleAvailable");
+			if(mDebug)
+				eDebug("PlayerBackend::gotMessage - subtitleAvailable");
 			gotPlayerMessage(PlayerMessage::subtitleAvailable);
 			break;
 		default:
-			eDebug("PlayerBackend::gotMessage - unhandled message");
+			if(mDebug)
+				eDebug("PlayerBackend::gotMessage - unhandled message");
 			break;
 	}
 }
@@ -531,13 +555,15 @@ void PlayerBackend::thread()
 
 void PlayerBackend::thread_finished()
 {
-	eDebug("PlayerBackend::thread_finished");
+	if(mDebug)
+		eDebug("PlayerBackend::thread_finished");
 	mThreadRunning = false;
 }
 
 void PlayerBackend::recvStarted(int status)
 {
-	eDebug("PlayerBackend::recvStart - status = %d", status);
+	if(mDebug)
+		eDebug("PlayerBackend::recvStart - status = %d", status);
 	if (playbackStarted || status)
 		return;
 	playbackStarted = true;
@@ -554,14 +580,16 @@ void PlayerBackend::recvStopped(int retval)
 		pthread_cond_signal(&mWaitForStopCond);
 	}
 	pthread_mutex_unlock(&mWaitForStopMutex);
-	eDebug("PlayerBackend::recvStopped - retval = %d", retval);
+	if(mDebug)
+		eDebug("PlayerBackend::recvStopped - retval = %d", retval);
 	quit(0);
 	mMessageMain.send(Message(Message::stop));
 }
 
 void PlayerBackend::recvPaused(int status)
 {
-	eDebug("PlayerBackend::recvPause - status = %d", status);
+	if(mDebug)
+		eDebug("PlayerBackend::recvPause - status = %d", status);
 	if (!status)
 	{
 		mTimer->stop();
@@ -571,7 +599,8 @@ void PlayerBackend::recvPaused(int status)
 
 void PlayerBackend::recvResumed(int status)
 {
-	eDebug("PlayerBackend::recvResume - status = %d", status);
+	if(mDebug)
+		eDebug("PlayerBackend::recvResume - status = %d", status);
 	if (!status)
 	{
 		mTimer->start(mTimerDelay, false);
@@ -588,7 +617,8 @@ void PlayerBackend::recvAudioTracksList(int status, std::vector<audioStream>& st
 
 void PlayerBackend::recvAudioTrackCurrent(int status, audioStream& stream)
 { 
-	eDebug("PlayerBackend::recvAudioTrackCurrent - status = %d", status);
+	if(mDebug)
+		eDebug("PlayerBackend::recvAudioTrackCurrent - status = %d", status);
 	if(!status)
 	{
 		if (pCurrentAudio != NULL)
@@ -602,7 +632,8 @@ void PlayerBackend::recvAudioTrackCurrent(int status, audioStream& stream)
 
 void PlayerBackend::recvAudioTrackSelected(int status, int trackId)
 {
-	eDebug("PlayerBackend::recvAudioTrackSelected - status = %d, trackId = %d", status, trackId);
+	if(mDebug)
+		eDebug("PlayerBackend::recvAudioTrackSelected - status = %d, trackId = %d", status, trackId);
 	if (!status)
 	{
 		for (std::vector<audioStream>::const_iterator i(mAudioStreams.begin()); i!=mAudioStreams.end(); i++)
@@ -630,7 +661,8 @@ void PlayerBackend::recvSubtitleTracksList(int status, std::vector<subtitleStrea
 
 void PlayerBackend::recvSubtitleTrackCurrent(int status, subtitleStream& stream)
 { 
-	eDebug("PlayerBackend::recvSubtitleTrackCurrent - status = %d", status);
+	if(mDebug)
+		eDebug("PlayerBackend::recvSubtitleTrackCurrent - status = %d", status);
 	if(!status)
 	{
 		if (pCurrentSubtitle != NULL)
@@ -644,7 +676,8 @@ void PlayerBackend::recvSubtitleTrackCurrent(int status, subtitleStream& stream)
 
 void PlayerBackend::recvSubtitleTrackSelected(int status, int trackId)
 {
-	eDebug("PlayerBackend::recvSubtitleTrackSelected - status = %d, trackId = %d", status, trackId);
+	if(mDebug)
+		eDebug("PlayerBackend::recvSubtitleTrackSelected - status = %d, trackId = %d", status, trackId);
 	if (!status)
 	{
 		for (std::vector<subtitleStream>::const_iterator i(mSubtitleStreams.begin()); i!=mSubtitleStreams.end(); i++)
@@ -665,7 +698,8 @@ void PlayerBackend::recvSubtitleTrackSelected(int status, int trackId)
 
 void PlayerBackend::recvVideoTrackCurrent(int status, videoStream& stream)
 {
-	eDebug("PlayerBackend::recvVideoTrackCurrent - status = %d", status);
+	if(mDebug)
+		eDebug("PlayerBackend::recvVideoTrackCurrent - status = %d", status);
 	if (!status)
 	{
 		videoStream prev;

@@ -222,6 +222,7 @@ class PlayerBackend: public sigc::trackable, public eThread, public eMainloop, p
 	int mPositionInMs, mLengthInMs;
 	bool playbackStarted;
 	bool mThreadRunning;
+	bool mDebug;
 
 	BasePlayer *pPlayer;
 
@@ -283,6 +284,7 @@ public:
 		mLengthInMs(0),
 		playbackStarted(false),
 		mThreadRunning(false),
+		mDebug(false),
 		pPlayer(extplayer),
 		pCurrentAudio(NULL),
 		pCurrentVideo(NULL),
@@ -338,6 +340,7 @@ public:
 	int subtitleGetTrackInfo(subtitleStream& trackInfo, int trackId);
 	int subtitleGetCurrentTrackNum();
 	int videoGetTrackInfo(videoStream& trackInfo, int trackId);
+	void setDebug(bool debug){mDebug = debug;}
 
 	PSignal1<void,int> gotPlayerMessage;
 };
