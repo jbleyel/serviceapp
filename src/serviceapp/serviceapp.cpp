@@ -885,7 +885,8 @@ RESULT eServiceApp::getPlayPosition(pts_t& pts)
 
 RESULT eServiceApp::setTrickmode(int trick)
 {
-	eDebug("eServiceApp::setTrickmode = %d", trick);
+	if (m_debug)
+		eDebug("eServiceApp::setTrickmode = %d", trick);
 	return -1;
 }
 
@@ -907,7 +908,8 @@ int eServiceApp::getNumberOfTracks()
 
 RESULT eServiceApp::selectTrack(unsigned int i)
 {
-	eDebug("eServiceApp::selectTrack = %d", i);
+	if (m_debug)
+		eDebug("eServiceApp::selectTrack = %d", i);
 	if (player->audioSelectTrack(i) < 0)
 	{
 		return -1;
@@ -959,7 +961,8 @@ RESULT eServiceApp::getTrackInfo(iAudioTrackInfo &trackInfo, unsigned int n)
 
 int eServiceApp::getCurrentTrack()
 {
-	eDebug("eServiceApp::getCurrentTrack");
+	if (m_debug)
+		eDebug("eServiceApp::getCurrentTrack");
 	return player->audioGetCurrentTrackNum();
 }
 
@@ -967,13 +970,15 @@ int eServiceApp::getCurrentTrack()
 // __iAudioChannelSelection
 int eServiceApp::getCurrentChannel()
 {
-	eDebug("eServiceApp::getCurrentChannel");
+	if (m_debug)
+		eDebug("eServiceApp::getCurrentChannel");
 	return STEREO;
 }
 
 RESULT eServiceApp::selectChannel(int i)
 {
-	eDebug("eServiceApp::selectChannel %d", i);
+	if (m_debug)
+		eDebug("eServiceApp::selectChannel %d", i);
 	return -1;
 }
 
