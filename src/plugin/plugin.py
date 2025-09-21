@@ -48,6 +48,9 @@ config_serviceapp.servicemp3 = ConfigSubsection()
 config_serviceapp.servicemp3.replace = ConfigBoolean(default=False, descriptions={0: _("original"), 1: _("serviceapp")})
 config_serviceapp.servicemp3.replace.value = serviceapp_client.isServiceMP3Replaced()
 config_serviceapp.servicemp3.player = ConfigSelection(default="gstplayer", choices=player_choices)
+config_serviceapp.passthrough_fix_enable = ConfigYesNo(default=False)
+delay_choices = [(i, ngettext("%d millisecond", "%d milliseconds", i) % i) for i in list(range(0, 3100, 100))]  # noqa: F821
+config_serviceapp.passthrough_fix_delay = ConfigSelection(choices=delay_choices, default=0)
 
 config_serviceapp.options = ConfigSubDict()
 config_serviceapp.options["servicemp3"] = ConfigSubsection()
