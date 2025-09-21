@@ -20,13 +20,6 @@ from enigma import eEnv, eServiceReference
 from . import _
 from . import serviceapp_client
 
-try:
-    from Components.SystemInfo import BoxInfo
-    IMAGEDISTRO = BoxInfo.getItem("distro")
-except:
-    from boxbranding import getImageDistro
-    IMAGEDISTRO = getImageDistro()
-
 SINKS_DEFAULT = ("", "")
 SINKS_EXPERIMENTAL = ("dvbvideosinkexp", "dvbaudiosinkexp")
 
@@ -163,8 +156,8 @@ init_serviceapp_settings()
 
 class ServiceAppSettings(Setup):
 	def __init__(self, session):
-		self.indent = parameters.get("SetupIndent", "  ")
-		self.spacer = ("---",)
+		self.indent = "   "
+		self.spacer = ("-" * 5,)
 		Setup.__init__(self, session)
 		self.title = _("ServiceApp")
 
@@ -229,6 +222,7 @@ class ServiceAppSettings(Setup):
 		config_list.append(self.spacer)
 		config_list.append((_("ServiceExtEplayer3 (%s)" % str(serviceapp_client.ID_SERVICEEXTEPLAYER3)),))
 		self.player_options("exteplayer3", "serviceexteplayer3", config_list)
+		config_list.append((_("Debug"), config_serviceapp.debug, _("Turn on debug messages")))
 		self["config"].list = config_list
 
 	def keySave(self):
@@ -262,15 +256,14 @@ class ServiceAppDetectPlayers(Screen):
 	skin = """
 		<screen position="center,center" size="500,340" title="ServiceApp - player check">
 			<widget name="text" position="10,10" size="490,325" font="Regular;28" halign="center" valign="center" />
-		</screen>
-				"""
+		</screen>"""
 
 	def __init__(self, session):
 		Screen.__init__(self, session)
 		self["text"] = Label()
 		self.players_iter = iter(
 			[
-				("gstplayer_gst-1.0", _("Detecting gstreamer player ..."), self.detect_gstplayer),
+				("gstplayer2", _("Detecting gstreamer player ..."), self.detect_gstplayer),
 				("exteplayer3", _("Detecting exteplayer3 player ..."), self.detect_exteplayer3),
 			]
 		)
@@ -342,7 +335,7 @@ def main(session, **kwargs):
 
 
 def menu(menuid, **kwargs):
-    if IMAGEDISTRO in ("openhdf", "teamblue"):
+    if BoxInfo.getItem("distro") in ("openhdf", "teamblue"):
         if menuid == "system":
             return [(_("ServiceApp"), main, "serviceapp_setup", None)]
     else:
